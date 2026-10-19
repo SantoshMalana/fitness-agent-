@@ -1,0 +1,44 @@
+PASS: test_tool_call_then_final_answer
+PASS: test_memory_used_across_turns
+PASS: test_max_steps_guard
+
+All smoke tests passed.
+============================================================
+TURN 1: set budget context + log two expenses
+============================================================
+[step 1] called add_expense({"item": "rent", "amount": 3000, "category": "housing"}) -> {'logged': {'item': 'rent', 'amount': 3000.0, 'category': 'housing'}, 'total_spent': 3000.0, 'expense_count': 1}
+[step 1] called add_expense({"item": "groceries", "amount": 450, "category": "food"}) -> {'logged': {'item': 'groceries', 'amount': 450.0, 'category': 'food'}, 'total_spent': 3450.0, 'expense_count': 2}
+[step 2] final answer:
+Logged rent (3000, housing) and groceries (450, food). Total spent so far: 3450.
+
+-> Logged rent (3000, housing) and groceries (450, food). Total spent so far: 3450.
+
+============================================================
+TURN 2: category summary
+============================================================
+[step 1] called get_summary({"category": "food"}) -> {'category': 'food', 'total': 450.0, 'count': 1}
+[step 2] final answer:
+You've spent 450 on food so far.
+
+-> You've spent 450 on food so far.
+
+============================================================
+TURN 3: affordability decision (the core agentic requirement)
+============================================================
+[step 1] called get_summary({}) -> {'total_spent': 3450.0, 'by_category': {'housing': 3000.0, 'food': 450.0}, 'expense_count': 2}
+[step 2] final answer:
+You've spent 3450 of your 20000 budget, leaving 16550. A 2000 rupee trip fits comfortably -- yes, you can afford it.
+
+-> You've spent 3450 of your 20000 budget, leaving 16550. A 2000 rupee trip fits comfortably -- yes, you can afford it.
+
+============================================================
+MEMORY CHECK: full conversation history retained across all 3 turns
+============================================================
+  user       -> My monthly budget is 20000 rupees. Log a 3000 expense for rent, category housing, and a 450 expense for groceries, category food.
+  assistant  -> Logged rent (3000, housing) and groceries (450, food). Total spent so far: 3450.
+  user       -> How much have I spent on food so far?
+  assistant  -> You've spent 450 on food so far.
+  user       -> Can I afford a 2000 rupee weekend trip this month?
+  assistant  -> You've spent 3450 of your 20000 budget, leaving 16550. A 2000 rupee trip fits comfortably -- yes, you can afford it.
+
+PASS: test_full_conversation_e2e (3-turn conversation, memory persisted and used correctly)
